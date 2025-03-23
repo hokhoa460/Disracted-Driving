@@ -18,8 +18,8 @@ void startAdvertising() async {
   final flutterBlue = FlutterBluePlus.instance;
 
   // Define a service UUID for your app
-  var serviceUuid = Guid("12345678-1234-5678-1234-56789abcdef0");
-  var characteristicUuid = Guid("abcdef12-3456-7890-abcd-ef1234567890");
+  var serviceUuid = Guid("1179d14a-163a-433d-8265-b3389565bdf0");
+  var characteristicUuid = Guid("c87f21dd-a4a7-419b-b038-49ee00c42f87");
 
   // Define a characteristic
   BluetoothCharacteristic characteristic = BluetoothCharacteristic(
