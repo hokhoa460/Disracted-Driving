@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "197589592344",
+    "project_id": "distracted-driving-oix5fw",
+    "storage_bucket": "distracted-driving-oix5fw.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197589592344:android:2fd59991eebc7a0345966d",
+        "android_client_info": {
+          "package_name": "com.mycompany.distracteddriving"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYRvXG1e-4kF2jq3Wa_XdRnRbzkyjBHis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
