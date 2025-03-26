@@ -12,34 +12,61 @@ import 'package:flutter/material.dart';
 // Set your action name, define your arguments and return parameter,
 // and then add the boilerplate code using the green button on the right!
 
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-void startAdvertising() async {
-  final flutterBlue = FlutterBluePlus.instance;
+class BluetoothService {
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
+  BluetoothDevice? connectedDevice;
+  BluetoothCharacteristic? characteristic;
 
-  // Define a service UUID for your app
-  var serviceUuid = Guid("1179d14a-163a-433d-8265-b3389565bdf0");
-  var characteristicUuid = Guid("c87f21dd-a4a7-419b-b038-49ee00c42f87");
+  Future<void> connectToDevice(String deviceId) async {
+    List<BluetoothDevice> devices = await flutterBlue.connectedDevices;
+    for (BluetoothDevice device in devices) {
+      if (device.id.id == deviceId) {
+        connectedDevice = device;
+        break;
+      }
+    }
 
-  // Define a characteristic
-  BluetoothCharacteristic characteristic = BluetoothCharacteristic(
-    characteristicUuid,
-    properties: BluetoothCharacteristicProperties(
-      read: true,
-      write: true,
-      notify: true,
-    ),
-    value: [],
-  );
+    if (connectedDevice == null) {
+      flutterBlue.scanResults.listen((results) {
+        for (ScanResult result in results) {
+          if (result.device.id.id == deviceId) {
+            connectedDevice = result.device;
+            flutterBlue.stopScan();
+            break;
+          }
+        }
+      });
+      await flutterBlue.startScan(timeout: Duration(seconds: 4));
+    }
 
-  // Create a service with the characteristic
-  BluetoothService service = BluetoothService(
-    serviceUuid,
-    isPrimary: true,
-    characteristics: [characteristic],
-  );
+    if (connectedDevice != null) {
+      await connectedDevice!.connect();
+      List<BluetoothService> services = await connectedDevice!.discoverServices();
+      for (BluetoothService service in services) {
+        for (BluetoothCharacteristic c in service.characteristics) {
+          characteristic = c;
+          break;
+        }
+        if (characteristic != null) break;
+      }
+    }
+  }
 
-  // Start advertising the service
-  await flutterBlue.startAdvertising(service);
-  print("BLE Advertising Started!");
+  Future<void> sendData(String data) async {
+    if (characteristic != null) {
+      await characteristic!.write(utf8.encode(data));
+    }
+  }
+
+  void listenForData(BuildContext context) {
+    characteristic?.value.listen((value) {
+      String data = utf8.decode(value);
+      // Trigger sound and visual alert
+      // Update your Dashboard page with the received data
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Data received: $data")));
+    });
+  }
 }
