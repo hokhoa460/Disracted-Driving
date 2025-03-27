@@ -52,7 +52,7 @@ dependencies:
   firebase_performance_platform_interface: 0.1.4+46
   firebase_performance_web: 0.1.7+4
   flutter_animate: 4.5.0
-  flutter_blue_plus:
+  flutter_blue_plus: ^1.35.3 
   flutter_cache_manager: 3.4.1
   font_awesome_flutter: 10.7.0
   from_css_color: 2.0.0
