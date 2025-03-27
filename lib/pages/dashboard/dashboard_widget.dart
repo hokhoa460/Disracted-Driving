@@ -69,7 +69,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         ScanResult r = results.last; // the most recently found device
         print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
 
-        if (r.device.remoteId.toString() == 'Your Device ID') {
+        if (r.device.remoteId.toString() == '38:9C:B2:97:68:FE') {
           await FlutterBluePlus.stopScan(); // Stop scanning first
           connectToDevice(r.device);
         }
@@ -115,7 +115,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       List<BluetoothService> services = await device!.discoverServices();
       for (BluetoothService service in services) {
         for (BluetoothCharacteristic c in service.characteristics) {
-          if (c.uuid.toString().toLowerCase() == 'your_characteristic_uuid') {
+          if (c.uuid.toString().toLowerCase() == 'c87f21dd-a4a7-419b-b038-49ee00c42f87') {
             characteristic = c;
             startListening(c);
             break;
