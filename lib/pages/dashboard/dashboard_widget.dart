@@ -34,7 +34,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Bluetooth-related variables
-  FlutterBluePlus flutterBlue = FlutterBluePlus.instance; // Instance of FlutterBluePlus
+  final flutterBlue = FlutterBluePlus(); // Instance of FlutterBluePlus
   BluetoothDevice? device; // Variable to hold the connected Bluetooth device
   BluetoothCharacteristic? characteristic; // Variable to hold the Bluetooth characteristic
   String data = ""; // Variable to hold the received data
@@ -51,26 +51,26 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   // Function to scan for Bluetooth devices
-  void scanForDevices() {
-    flutterBlue.startScan(timeout: Duration(seconds: 4)); // Start scanning for 4 seconds
+void scanForDevices() async {
+  await flutterBlue.scan(timeout: const Duration(seconds: 4));
 
-    // Listen to scan results
-    var subscription = flutterBlue.scanResults.listen((results) {
-      for (ScanResult r in results) {
-        print('${r.device.name} found! rssi: ${r.rssi}');
-        // Check if the found device matches the desired device name
-        if (r.device.name == 'Your Device Name') { // Update this line with your device's name
-          flutterBlue.stopScan(); // Stop scanning once the device is found
-          connectToDevice(r.device); // Connect to the found device
-          break;
-        }
+  flutterBlue.onScanResults.listen((results) {
+    for (ScanResult r in results) {
+      print('${r.device.advName} found! rssi: ${r.rssi}');
+      if (r.device.advName == 'Your Device Name') {
+        await flutterBlue.stopScan();
+        connectToDevice(r.device);
+        break;
       }
-    });
+    }
+  });
+}
+
 
     // Stop scanning after the timeout
     Future.delayed(Duration(seconds: 4), () {
       subscription.cancel();
-      flutterBlue.stopScan();
+      await flutterBlue.stopScan();
     });
   }
 
