@@ -34,7 +34,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Bluetooth-related variables
-  final flutterBlue = FlutterBluePlus.instance; // Fix: Correct way to access singleton
+  final FlutterBluePlus flutterBlue = FlutterBluePlus.instance; // Fix: Correct way to access singleton
   BluetoothDevice? device;
   BluetoothCharacteristic? characteristic;
   String data = "";
