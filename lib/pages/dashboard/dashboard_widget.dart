@@ -254,4 +254,144 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
                                         color: Colors.white,
-                                        letter_* ▋
+                                        letterSpacing: 0.0,
+                                      ),
+                                  iconColor: FlutterFlowTheme.of(context).primaryText,
+                                  iconSize: 18.0,
+                                  elevation: 0.0,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                                unselectedChipStyle: ChipStyle(
+                                  backgroundColor: Color(0x33FFFFFF),
+                                  textStyle: FlutterFlowTheme.of(context).bodySmall.override(
+                                        fontFamily: 'Inter',
+                                        color: Color(0xFFE0E0E0),
+                                        letterSpacing: 0.0,
+                                      ),
+                                  iconColor: FlutterFlowTheme.of(context).primaryText,
+                                  iconSize: 18.0,
+                                  elevation: 0.0,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                                chipSpacing: 16.0,
+                                rowSpacing: 16.0,
+                                multiselect: false,
+                                alignment: WrapAlignment.start,
+                                controller: _model.choiceChipsValueController ??=
+                                    FormFieldController<List<String>>(
+                                  [],
+                                ),
+                                wrapped: true,
+                              ),
+                              Container(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                height: 300.0,
+                                decoration: BoxDecoration(
+                                  color: Color(0x33FFFFFF),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Recent Detections',
+                                        style: FlutterFlowTheme.of(context).headlineSmall.override(
+                                              fontFamily: 'Inter Tight',
+                                              color: Colors.white,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                      ListView(
+                                        padding: EdgeInsets.zero,
+                                        primary: false,
+                                        shrinkWrap: true,
+                                        scrollDirection: Axis.vertical,
+                                        children: [
+                                          Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Drowsiness Detected',
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.0,
+                                                    ),
+                                              ),
+                                              Text(
+                                                '2 hours ago',
+                                                style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Color(0xFFE0E0E0),
+                                                      letterSpacing: 0.0,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Lane Departure Warning',
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.0,
+                                                    ),
+                                              ),
+                                              Text(
+                                                '4 hours ago',
+                                                style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Color(0xFFE0E0E0),
+                                                      letterSpacing: 0.0,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ].divide(SizedBox(height: 16.0)),
+                                  ),
+                                ),
+                              ),
+                            ].divide(SizedBox(height: 16.0)),
+                          ),
+                        ),
+                      ),
+                      FFButtonWidget(
+                        onPressed: () async {
+                          context.pushNamed(IncidentGraphWidget.routeName);
+                        },
+                        text: 'View Full Report',
+                        options: FFButtonOptions(
+                          width: MediaQuery.sizeOf(context).width * 1.0,
+                          height: 50.0,
+                          padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          color: FlutterFlowTheme.of(context).primary,
+                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                fontFamily: 'Inter Tight',
+                                color: Colors.white,
+                                letterSpacing: 0.0,
+                              ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                      ),
+                    ].divide(SizedBox(height: 24.0)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
