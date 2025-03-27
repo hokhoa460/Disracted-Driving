@@ -10,6 +10,7 @@ export 'dashboard_model.dart';
 
 // Import flutter_blue_plus for Bluetooth functionality
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'dart:io';
 
 class DashboardWidget extends StatefulWidget {
   const DashboardWidget({
@@ -34,7 +35,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Bluetooth-related variables
-  final FlutterBluePlus flutterBlue = FlutterBluePlus.instance; // Fix: Correct way to access singleton
+  final FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   BluetoothDevice? device;
   BluetoothCharacteristic? characteristic;
   String data = "";
@@ -51,24 +52,36 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   // Function to scan for Bluetooth devices
   void scanForDevices() async {
-    flutterBlue.startScan(timeout: const Duration(seconds: 4));
+    // Wait for Bluetooth enabled & permission granted
+    await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
 
-    flutterBlue.scanResults.listen((results) async {
-      for (ScanResult r in results) {
-        print('${r.device.name} found! rssi: ${r.rssi}');
+    // Start scanning with optional filters
+    await FlutterBluePlus.startScan(
+      withServices: [Guid("180D")], // Optional: match any of the specified services
+      withNames: ["Bluno"], // Optional: match any of the specified names
+      timeout: Duration(seconds: 15),
+    );
 
-        if (r.device.name == 'Your Device Name') {
-          await flutterBlue.stopScan(); // Stop scanning first
+    // Listen to scan results
+    var subscription = FlutterBluePlus.onScanResults.listen((results) async {
+      if (results.isNotEmpty) {
+        ScanResult r = results.last; // the most recently found device
+        print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
+
+        if (r.device.remoteId.toString() == 'Your Device ID') {
+          await FlutterBluePlus.stopScan(); // Stop scanning first
           connectToDevice(r.device);
-          break;
         }
       }
-    });
+    },
+    onError: (e) => print(e),
+    );
 
-    // Stop scanning automatically after timeout
-    Future.delayed(const Duration(seconds: 4), () async {
-      await flutterBlue.stopScan();
-    });
+    // Cleanup: cancel subscription when scanning stops
+    FlutterBluePlus.cancelWhenScanComplete(subscription);
+
+    // Wait for scanning to stop
+    await FlutterBluePlus.isScanning.where((val) => val == false).first;
   }
 
   // Function to connect to the Bluetooth device
@@ -79,14 +92,26 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         return;
       }
 
-      print("Connecting to ${d.name}...");
-      await d.connect(autoConnect: false);
+      print("Connecting to ${d.remoteId}...");
+      await d.connect(autoConnect: true);
       setState(() {
         device = d;
       });
 
+      // Listen for disconnection
+      var disconnectionSubscription = device?.connectionState.listen((BluetoothConnectionState state) async {
+        if (state == BluetoothConnectionState.disconnected) {
+          print("${device?.disconnectReason?.code} ${device?.disconnectReason?.description}");
+          // Re-discover services after disconnection
+          await device?.discoverServices();
+        }
+      });
+
+      // Cleanup: cancel subscription when disconnected
+      device?.cancelWhenDisconnected(disconnectionSubscription, delayed: true, next: true);
+
       // Discover services
-      List<BluetoothService> services = await d.discoverServices();
+      List<BluetoothService> services = await device!.discoverServices();
       for (BluetoothService service in services) {
         for (BluetoothCharacteristic c in service.characteristics) {
           if (c.uuid.toString().toLowerCase() == 'your_characteristic_uuid') {
@@ -106,7 +131,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     try {
       await characteristic.setNotifyValue(true); // Enable notifications
 
-      characteristic.lastValueStream.listen((value) {
+      var subscription = characteristic.lastValueStream.listen((value) {
         String receivedData = String.fromCharCodes(value);
         print("Received Data: $receivedData");
         setState(() {
@@ -114,6 +139,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         });
         triggerAlert(receivedData);
       });
+
+      // Cleanup: cancel subscription when disconnected
+      device?.cancelWhenDisconnected(subscription);
     } catch (e) {
       print("Error subscribing to notifications: $e");
     }
