@@ -34,10 +34,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Bluetooth-related variables
-  final flutterBlue = FlutterBluePlus(); // Instance of FlutterBluePlus
-  BluetoothDevice? device; // Variable to hold the connected Bluetooth device
-  BluetoothCharacteristic? characteristic; // Variable to hold the Bluetooth characteristic
-  String data = ""; // Variable to hold the received data
+  final flutterBlue = FlutterBluePlus.instance; // Fix: Correct way to access singleton
+  BluetoothDevice? device;
+  BluetoothCharacteristic? characteristic;
+  String data = "";
 
   @override
   void initState() {
@@ -46,26 +46,26 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
 
-    // Start scanning for Bluetooth devices when the widget is initialized
     scanForDevices();
   }
 
   // Function to scan for Bluetooth devices
   void scanForDevices() async {
-    await flutterBlue.startScan(timeout: const Duration(seconds: 4));
+    flutterBlue.startScan(timeout: const Duration(seconds: 4));
 
-    flutterBlue.scanResults.listen((results) {
+    flutterBlue.scanResults.listen((results) async {
       for (ScanResult r in results) {
         print('${r.device.name} found! rssi: ${r.rssi}');
+
         if (r.device.name == 'Your Device Name') {
-          await flutterBlue.stopScan();
+          await flutterBlue.stopScan(); // Stop scanning first
           connectToDevice(r.device);
           break;
         }
       }
     });
 
-    // Stop scanning after the timeout
+    // Stop scanning automatically after timeout
     Future.delayed(const Duration(seconds: 4), () async {
       await flutterBlue.stopScan();
     });
@@ -73,48 +73,64 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   // Function to connect to the Bluetooth device
   void connectToDevice(BluetoothDevice d) async {
-    await d.connect(); // Connect to the device
-    setState(() {
-      device = d; // Update the connected device state
-    });
+    try {
+      if (device != null) {
+        print("Already connected to a device.");
+        return;
+      }
 
-    // Discover services and characteristics of the connected device
-    List<BluetoothService> services = await d.discoverServices();
-    for (BluetoothService service in services) {
-      for (BluetoothCharacteristic c in service.characteristics) {
-        // Check if the characteristic matches the desired UUID
-        if (c.uuid.toString() == 'YOUR_CHARACTERISTIC_UUID') { // Update this line with your characteristic UUID
-          characteristic = c; // Update the characteristic state
-          startListening(characteristic!); // Start listening for data from the characteristic
+      print("Connecting to ${d.name}...");
+      await d.connect(autoConnect: false);
+      setState(() {
+        device = d;
+      });
+
+      // Discover services
+      List<BluetoothService> services = await d.discoverServices();
+      for (BluetoothService service in services) {
+        for (BluetoothCharacteristic c in service.characteristics) {
+          if (c.uuid.toString().toLowerCase() == 'your_characteristic_uuid') {
+            characteristic = c;
+            startListening(c);
+            break;
+          }
         }
       }
+    } catch (e) {
+      print("Error connecting: $e");
     }
   }
 
-  // Function to start listening for data from the Bluetooth characteristic
-  void startListening(BluetoothCharacteristic characteristic) {
-    characteristic.value.listen((value) {
-      String receivedData = String.fromCharCodes(value); // Convert received bytes to string
-      triggerAlert(receivedData); // Trigger an alert with the received data
-      setState(() {
-        data = receivedData; // Update the dashboard state with the received data
+  // Function to listen for data from Bluetooth characteristic
+  void startListening(BluetoothCharacteristic characteristic) async {
+    try {
+      await characteristic.setNotifyValue(true); // Enable notifications
+
+      characteristic.lastValueStream.listen((value) {
+        String receivedData = String.fromCharCodes(value);
+        print("Received Data: $receivedData");
+        setState(() {
+          data = receivedData;
+        });
+        triggerAlert(receivedData);
       });
-    });
-    characteristic.setNotifyValue(true); // Enable notifications for the characteristic
+    } catch (e) {
+      print("Error subscribing to notifications: $e");
+    }
   }
 
-  // Function to trigger a sound and visual alert with the received data
   void triggerAlert(String data) {
-    // Trigger sound and visual alert
-    print("Received Data: $data"); // Print the received data to the console
-    // Add code for playing sound and showing visual alert here
+    print("Alert Triggered with Data: $data");
+    // Add sound/visual alert logic here
   }
 
   @override
   void dispose() {
     _model.dispose();
+    device?.disconnect();
     super.dispose();
   }
+}
 
   @override
   Widget build(BuildContext context) {
