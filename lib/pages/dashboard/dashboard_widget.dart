@@ -51,25 +51,22 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   // Function to scan for Bluetooth devices
-void scanForDevices() async {
-  await flutterBlue.scan(timeout: const Duration(seconds: 4));
+  void scanForDevices() async {
+    await flutterBlue.startScan(timeout: const Duration(seconds: 4));
 
-  flutterBlue.onScanResults.listen((results) {
-    for (ScanResult r in results) {
-      print('${r.device.advName} found! rssi: ${r.rssi}');
-      if (r.device.advName == 'Your Device Name') {
-        await flutterBlue.stopScan();
-        connectToDevice(r.device);
-        break;
+    flutterBlue.scanResults.listen((results) {
+      for (ScanResult r in results) {
+        print('${r.device.name} found! rssi: ${r.rssi}');
+        if (r.device.name == 'Your Device Name') {
+          await flutterBlue.stopScan();
+          connectToDevice(r.device);
+          break;
+        }
       }
-    }
-  });
-}
-
+    });
 
     // Stop scanning after the timeout
-    Future.delayed(Duration(seconds: 4), () {
-      subscription.cancel();
+    Future.delayed(const Duration(seconds: 4), () async {
       await flutterBlue.stopScan();
     });
   }
@@ -83,15 +80,15 @@ void scanForDevices() async {
 
     // Discover services and characteristics of the connected device
     List<BluetoothService> services = await d.discoverServices();
-    services.forEach((service) {
-      service.characteristics.forEach((c) {
+    for (BluetoothService service in services) {
+      for (BluetoothCharacteristic c in service.characteristics) {
         // Check if the characteristic matches the desired UUID
         if (c.uuid.toString() == 'YOUR_CHARACTERISTIC_UUID') { // Update this line with your characteristic UUID
           characteristic = c; // Update the characteristic state
           startListening(characteristic!); // Start listening for data from the characteristic
         }
-      });
-    });
+      }
+    }
   }
 
   // Function to start listening for data from the Bluetooth characteristic
@@ -116,7 +113,6 @@ void scanForDevices() async {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -153,8 +149,7 @@ void scanForDevices() async {
                   ),
                 ),
                 child: Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 0.0),
+                  padding: EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,13 +181,12 @@ void scanForDevices() async {
                       ),
                       Text(
                         'Dashboard',
-                        style:
-                            FlutterFlowTheme.of(context).headlineLarge.override(
-                                  fontFamily: 'Inter Tight',
-                                  color: Colors.white,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: FlutterFlowTheme.of(context).headlineLarge.override(
+                              fontFamily: 'Inter Tight',
+                              color: Colors.white,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
@@ -201,16 +195,13 @@ void scanForDevices() async {
                           borderRadius: BorderRadius.circular(16.0),
                         ),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              16.0, 16.0, 16.0, 16.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Text(
                                 'Welcome, Trucker!',
-                                style: FlutterFlowTheme.of(context)
-                                    .headlineMedium
-                                    .override(
+                                style: FlutterFlowTheme.of(context).headlineMedium.override(
                                       fontFamily: 'Inter Tight',
                                       color: Colors.white,
                                       letterSpacing: 0.0,
@@ -218,9 +209,7 @@ void scanForDevices() async {
                               ),
                               Text(
                                 'Stay safe on the road with our advanced detection system and helpful tips.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
+                                style: FlutterFlowTheme.of(context).bodyLarge.override(
                                       fontFamily: 'Inter',
                                       color: Color(0xFFE0E0E0),
                                       letterSpacing: 0.0,
@@ -237,8 +226,7 @@ void scanForDevices() async {
                           borderRadius: BorderRadius.circular(16.0),
                         ),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              16.0, 16.0, 16.0, 16.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -247,32 +235,25 @@ void scanForDevices() async {
                                 onChanged: (val) => safeSetState(() =>
                                     _model.choiceChipsValue = val?.firstOrNull),
                                 selectedChipStyle: ChipStyle(
-                                  backgroundColor:
-                                      FlutterFlowTheme.of(context).primary,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
+                                  backgroundColor: FlutterFlowTheme.of(context).primary,
+                                  textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
                                         color: Colors.white,
                                         letterSpacing: 0.0,
                                       ),
-                                  iconColor:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  iconColor: FlutterFlowTheme.of(context).primaryText,
                                   iconSize: 18.0,
                                   elevation: 0.0,
                                   borderRadius: BorderRadius.circular(25.0),
                                 ),
                                 unselectedChipStyle: ChipStyle(
                                   backgroundColor: Color(0x33FFFFFF),
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
+                                  textStyle: FlutterFlowTheme.of(context).bodySmall.override(
                                         fontFamily: 'Inter',
                                         color: Color(0xFFE0E0E0),
                                         letterSpacing: 0.0,
                                       ),
-                                  iconColor:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  iconColor: FlutterFlowTheme.of(context).primaryText,
                                   iconSize: 18.0,
                                   elevation: 0.0,
                                   borderRadius: BorderRadius.circular(25.0),
@@ -281,9 +262,8 @@ void scanForDevices() async {
                                 rowSpacing: 16.0,
                                 multiselect: false,
                                 alignment: WrapAlignment.start,
-                                controller:
-                                    _model.choiceChipsValueController ??=
-                                        FormFieldController<List<String>>(
+                                controller: _model.choiceChipsValueController ??=
+                                    FormFieldController<List<String>>(
                                   [],
                                 ),
                                 wrapped: true,
@@ -296,18 +276,14 @@ void scanForDevices() async {
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 16.0, 16.0, 16.0),
+                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Recent Detections',
-                                        style: FlutterFlowTheme.of(context)
-                                            .headlineSmall
-                                            .override(
+                                        style: FlutterFlowTheme.of(context).headlineSmall.override(
                                               fontFamily: 'Inter Tight',
                                               color: Colors.white,
                                               letterSpacing: 0.0,
@@ -321,61 +297,45 @@ void scanForDevices() async {
                                         children: [
                                           Row(
                                             mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 'Drowsiness Detected',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: Colors.white,
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.0,
+                                                    ),
                                               ),
                                               Text(
                                                 '2 hours ago',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodySmall
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color:
-                                                              Color(0xFFE0E0E0),
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Color(0xFFE0E0E0),
+                                                      letterSpacing: 0.0,
+                                                    ),
                                               ),
                                             ],
                                           ),
                                           Row(
                                             mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 'Lane Departure Warning',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: Colors.white,
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.0,
+                                                    ),
                                               ),
                                               Text(
                                                 '4 hours ago',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodySmall
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color:
-                                                              Color(0xFFE0E0E0),
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                      fontFamily: 'Inter',
+                                                      color: Color(0xFFE0E0E0),
+                                                      letterSpacing: 0.0,
+                                                    ),
                                               ),
                                             ],
                                           ),
@@ -397,17 +357,14 @@ void scanForDevices() async {
                         options: FFButtonOptions(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 50.0,
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 0.0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 0.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                           color: FlutterFlowTheme.of(context).primary,
-                          textStyle:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    fontFamily: 'Inter Tight',
-                                    color: Colors.white,
-                                    letterSpacing: 0.0,
-                                  ),
+                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                fontFamily: 'Inter Tight',
+                                color: Colors.white,
+                                letterSpacing: 0.0,
+                              ),
                           elevation: 0.0,
                           borderRadius: BorderRadius.circular(25.0),
                         ),
