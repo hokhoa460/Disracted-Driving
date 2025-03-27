@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'dashboard_model.dart';
 export 'dashboard_model.dart';
 
+// Import flutter_blue_plus for Bluetooth functionality
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
 class DashboardWidget extends StatefulWidget {
   const DashboardWidget({
     super.key,
@@ -30,12 +33,78 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Bluetooth-related variables
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance; // Instance of FlutterBluePlus
+  BluetoothDevice? device; // Variable to hold the connected Bluetooth device
+  BluetoothCharacteristic? characteristic; // Variable to hold the Bluetooth characteristic
+  String data = ""; // Variable to hold the received data
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DashboardModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+
+    // Start scanning for Bluetooth devices when the widget is initialized
+    scanForDevices();
+  }
+
+  // Function to scan for Bluetooth devices
+  void scanForDevices() {
+    flutterBlue.startScan(timeout: Duration(seconds: 4)); // Start scanning for 4 seconds
+
+    // Listen to scan results
+    flutterBlue.scanResults.listen((results) {
+      for (ScanResult r in results) {
+        print('${r.device.name} found! rssi: ${r.rssi}');
+        // Check if the found device matches the desired device name
+        if (r.device.name == 'Your Device Name') { // Update this line with your device's name
+          flutterBlue.stopScan(); // Stop scanning once the device is found
+          connectToDevice(r.device); // Connect to the found device
+          break;
+        }
+      }
+    });
+  }
+
+  // Function to connect to the Bluetooth device
+  void connectToDevice(BluetoothDevice d) async {
+    await d.connect(); // Connect to the device
+    setState(() {
+      device = d; // Update the connected device state
+    });
+
+    // Discover services and characteristics of the connected device
+    List<BluetoothService> services = await d.discoverServices();
+    services.forEach((service) {
+      service.characteristics.forEach((c) {
+        // Check if the characteristic matches the desired UUID
+        if (c.uuid.toString() == 'YOUR_CHARACTERISTIC_UUID') { // Update this line with your characteristic UUID
+          characteristic = c; // Update the characteristic state
+          startListening(characteristic!); // Start listening for data from the characteristic
+        }
+      });
+    });
+  }
+
+  // Function to start listening for data from the Bluetooth characteristic
+  void startListening(BluetoothCharacteristic characteristic) {
+    characteristic.value.listen((value) {
+      String receivedData = String.fromCharCodes(value); // Convert received bytes to string
+      triggerAlert(receivedData); // Trigger an alert with the received data
+      setState(() {
+        data = receivedData; // Update the dashboard state with the received data
+      });
+    });
+    characteristic.setNotifyValue(true); // Enable notifications for the characteristic
+  }
+
+  // Function to trigger a sound and visual alert with the received data
+  void triggerAlert(String data) {
+    // Trigger sound and visual alert
+    print("Received Data: $data"); // Print the received data to the console
+    // Add code for playing sound and showing visual alert here
   }
 
   @override
