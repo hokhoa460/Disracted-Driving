@@ -11,6 +11,7 @@ export 'dashboard_model.dart';
 // Import flutter_blue_plus for Bluetooth functionality
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:io';
+import 'dart:async';
 
 class DashboardWidget extends StatefulWidget {
   const DashboardWidget({
@@ -35,7 +36,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Bluetooth-related variables
-  final FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
+  final flutterBlue = FlutterBluePlus.instance;
   BluetoothDevice? device;
   BluetoothCharacteristic? characteristic;
   String data = "";
@@ -99,7 +100,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       });
 
       // Listen for disconnection
-      var disconnectionSubscription = device?.connectionState.listen((BluetoothConnectionState state) async {
+      var disconnectionSubscription = device!.connectionState.listen((BluetoothConnectionState state) async {
         if (state == BluetoothConnectionState.disconnected) {
           print("${device?.disconnectReason?.code} ${device?.disconnectReason?.description}");
           // Re-discover services after disconnection
@@ -319,7 +320,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
+                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 0.0, 0.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment: CrossAxisAlignment.start,
