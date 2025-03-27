@@ -55,7 +55,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     flutterBlue.startScan(timeout: Duration(seconds: 4)); // Start scanning for 4 seconds
 
     // Listen to scan results
-    flutterBlue.scanResults.listen((results) {
+    var subscription = flutterBlue.scanResults.listen((results) {
       for (ScanResult r in results) {
         print('${r.device.name} found! rssi: ${r.rssi}');
         // Check if the found device matches the desired device name
@@ -65,6 +65,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
           break;
         }
       }
+    });
+
+    // Stop scanning after the timeout
+    Future.delayed(Duration(seconds: 4), () {
+      subscription.cancel();
+      flutterBlue.stopScan();
     });
   }
 
