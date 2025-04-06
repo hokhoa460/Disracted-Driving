@@ -16,7 +16,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>Distracted Driving Detection</string>
 	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
+	<string>Runner</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.test.distracteddriving</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -27,7 +27,7 @@
 	<string>APPL</string>
 
 	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
+	<string>1.0.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
