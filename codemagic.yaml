@@ -39,4 +39,5 @@ workflows:
       private_key: $APP_STORE_CONNECT_PRIVATE_KEY
     provisioning_profile:
       type: development
-      bundle_identifier: your.bundle.identifier
+      bundle_identifier: com.test.distracteddriving
+      bundle_identifier: com.test.distracteddriving.ImageNotification
