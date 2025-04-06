@@ -1,0 +1,21 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    environment:
+      groups:
+        - ios_credentials
+    scripts:
+      - name: Set up code signing
+        script: |
+          #!/bin/bash
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security import /path/to/certificate.p12 -P "$CERTIFICATE_PASSWORD" -A
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp /path/to/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+      - name: Build iOS app
+        script: |
+          flutter build ios --release --no-codesign
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner archive -archivePath build/Runner.xcarchive
+          xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/Runner
