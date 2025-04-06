@@ -28,7 +28,7 @@ workflows:
       vars:
         KEYCHAIN_PASSWORD: Thunderup1
         APP_STORE_CONNECT_KEY_ID: U6BF49786N
-        APP_STORE_CONNECT_ISSUER_ID: TYP7BD11U2Z1
+        APP_STORE_CONNECT_ISSUER_ID: TJ3WB325FK
         APP_STORE_CONNECT_PRIVATE_KEY: MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgXQ6Tz4u1djsh++w0
                                         /Wx+nfh1eun+QP0iIfZ5TdvgGW+gCgYIKoZIzj0DAQehRANCAASD9rRk7dnQ0J/Z
                                         OJz1hZv8uh81I5nudSFt9TGUhd4WEIfMeyN6GeASkR2LiDd9O9/xNUEQnd7R1pUV
