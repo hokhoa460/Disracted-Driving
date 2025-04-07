@@ -76,6 +76,7 @@
     	<string>audio</string>
     	<string>location</string>
 	<string>bluetooth-central</string>
+	<string>bluetooth-peripheral</string>
     </array>
 
 
