@@ -75,6 +75,7 @@
         <string>remote-notification</string>
     	<string>audio</string>
     	<string>location</string>
+	<string>bluetooth-central</string>
     </array>
 
 
